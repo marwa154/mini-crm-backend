@@ -1,56 +1,6 @@
 import Client from "../models/Client.js";
 
-/**
- * GET /api/clients
- * Tous les employés peuvent voir tous les clients.
- * Ajoute les indicateurs : can_edit, is_owner
- */
-export const getAllClients = async (req, res) => {
-  try {
-    const clients = await Client.find()
-      .populate("created_by", "name email role")
-      .populate("primary_owner", "name email role");
-
-    const result = clients.map((client) => {
-      const is_owner = client.primary_owner?._id.toString() === req.user_id.toString();
-      const can_edit =
-        req.user.role === "admin" ||
-        client.created_by?._id.toString() === req.user_id.toString();
-
-      return {
-        _id: client._id,
-        fullName: client.fullName,
-        company: client.company,
-        email: client.email,
-        phone: client.phone,
-        address: client.address,
-        city: client.city,
-        postalCode: client.postalCode,
-        created_by: client.created_by,
-        primary_owner: client.primary_owner,
-        is_shared: client.is_shared,
-        createdAt: client.createdAt,
-        updatedAt: client.updatedAt,
-
-        // 👇 Indicateurs de permission
-        permissions: {
-          can_edit,
-          is_owner,
-        },
-      };
-    });
-
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-/**
- * POST /api/clients
- * Seul un utilisateur authentifié peut créer un client.
- * created_by & primary_owner = utilisateur connecté
- */
+// ✅ Create a client (authenticated user)
 export const createClient = async (req, res) => {
   try {
     const { fullName, company, email, phone, address, city, postalCode } = req.body;
@@ -67,8 +17,7 @@ export const createClient = async (req, res) => {
       address,
       city,
       postalCode,
-      created_by: req.user_id,
-      primary_owner: req.user_id,
+      createdBy: req.user._id,
     });
 
     res.status(201).json({
@@ -80,82 +29,75 @@ export const createClient = async (req, res) => {
   }
 };
 
-/**
- * PUT /api/clients/:id
- * Seul le créateur ou un admin peut modifier
- */
+// ✅ Get all clients
+// - Admins see all clients
+// - Users see only their own
+export const getAllClients = async (req, res) => {
+  try {
+    let clients;
+
+    if (req.user.role === "admin") {
+      clients = await Client.find().populate("createdBy", "name email");
+    } else {
+      clients = await Client.find({ createdBy: req.user._id });
+    }
+
+    res.status(200).json(clients);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Get a single client by ID
+export const getClientById = async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.id).populate("createdBy", "name email");
+
+    if (!client) return res.status(404).json({ message: "Client not found" });
+
+    // Only admin or creator can access
+    if (req.user.role !== "admin" && client.createdBy._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    res.status(200).json(client);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Update a client (only admin or creator)
 export const updateClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
 
-    const isAdmin = req.user.role === "admin";
-    const isCreator = client.created_by.toString() === req.user_id.toString();
-
-    if (!isAdmin && !isCreator) {
-      return res.status(403).json({ message: "Access denied: cannot edit this client" });
+    // check permissions
+    if (req.user.role !== "admin" && client.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
     }
 
     Object.assign(client, req.body);
     await client.save();
 
-    res.status(200).json({
-      message: "Client updated successfully",
-      client,
-    });
+    res.status(200).json({ message: "Client updated successfully", client });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-/**
- * DELETE /api/clients/:id
- * Seul le créateur ou un admin peut supprimer
- */
+// ✅ Delete a client (only admin or creator)
 export const deleteClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
 
-    const isAdmin = req.user.role === "admin";
-    const isCreator = client.created_by.toString() === req.user_id.toString();
-
-    if (!isAdmin && !isCreator) {
-      return res.status(403).json({ message: "Access denied: cannot delete this client" });
+    if (req.user.role !== "admin" && client.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
     }
 
     await client.deleteOne();
     res.status(200).json({ message: "Client deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-/**
- * GET /api/clients/:id
- * Tous les employés peuvent voir tous les clients
- * Ajoute les indicateurs can_edit, is_owner
- */
-export const getClientById = async (req, res) => {
-  try {
-    const client = await Client.findById(req.params.id)
-      .populate("created_by", "name email role")
-      .populate("primary_owner", "name email role");
-
-    if (!client) return res.status(404).json({ message: "Client not found" });
-
-    const is_owner = client.primary_owner?._id.toString() === req.user_id.toString();
-    const can_edit =
-      req.user.role === "admin" ||
-      client.created_by?._id.toString() === req.user_id.toString();
-
-    res.status(200).json({
-      ...client.toObject(),
-      permissions: {
-        can_edit,
-        is_owner,
-      },
-    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -38,21 +38,10 @@ const clientSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
-    // 👇 Nouveaux champs
-    created_by: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-    },
-    primary_owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    is_shared: {
-      type: Boolean,
-      default: true,
     },
   },
   { timestamps: true }
