@@ -8,7 +8,9 @@ import morgan from "morgan";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
-
+import devisRoutes from "./routes/devisRoutes.js";
+import factureRoutes from "./routes/factureRoutes.js";
+import journalisationRoutes from "./routes/journalisationRoutes.js";
 import User from "./models/User.js";
 import bcrypt from "bcrypt";
 
@@ -50,6 +52,10 @@ createDefaultAdmin();
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/clients", clientRoutes);
+
+app.use("/api/devis",devisRoutes);
+app.use("/api/facture",factureRoutes);
+app.use("/api/jounalisation",journalisationRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
