@@ -13,6 +13,7 @@ const FactureSchema = new mongoose.Schema(
     devisId: { type: mongoose.Schema.Types.ObjectId, ref: "Devis", default: null }, // si la facture vient d’un devis
     invoiceDate: { type: Date, default: Date.now },
     dueDate: { type: Date },
+
     status: {
       type: String,
       status: ["non payée", "partiellement payée", "payée"],
@@ -22,6 +23,7 @@ const FactureSchema = new mongoose.Schema(
     tva: { type: Number, default: 19 },
     totalHT: { type: Number, default: 0 },
     totalTTC: { type: Number, default: 0 },
+      description: { type: String, default: ""  },
     lignes: [ligneSchema],
   },
   { timestamps: true }
