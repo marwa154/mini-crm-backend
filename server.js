@@ -13,6 +13,9 @@ import factureRoutes from "./routes/factureRoutes.js";
 import journalisationRoutes from "./routes/journalisationRoutes.js";
 import User from "./models/User.js";
 import statsRoutes from "./routes/statsRoutes.js";
+import bcrypt from "bcrypt";
+import notificationRoutes from './routes/notificationsRoutes.js';
+
 dotenv.config();
 
 connectDB();
@@ -57,6 +60,8 @@ app.use("/api/facture",factureRoutes);
 app.use("/api/jounalisation",journalisationRoutes);
 
 app.use("/api/stats", statsRoutes);
+app.use('/api/notifications', notificationRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
