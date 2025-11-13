@@ -13,7 +13,7 @@ const journalActionSchema = new mongoose.Schema({
   },
   module: {
     type: String,
-    enum: ["DEVIS", "FACTURE", "CLIENT", "AUTRE"],
+    enum: ["DEVIS", "FACTURE", "CLIENT", "AUTRE","USER"],
     required: true,
   },
   targetId: {

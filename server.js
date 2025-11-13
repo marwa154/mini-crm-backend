@@ -12,6 +12,7 @@ import devisRoutes from "./routes/devisRoutes.js";
 import factureRoutes from "./routes/factureRoutes.js";
 import journalisationRoutes from "./routes/journalisationRoutes.js";
 import User from "./models/User.js";
+import statsRoutes from "./routes/statsRoutes.js";
 import bcrypt from "bcrypt";
 import notificationRoutes from './routes/notificationsRoutes.js';
 
@@ -58,6 +59,7 @@ app.use("/api/devis",devisRoutes);
 app.use("/api/facture",factureRoutes);
 app.use("/api/jounalisation",journalisationRoutes);
 
+app.use("/api/stats", statsRoutes);
 app.use('/api/notifications', notificationRoutes);
 
 
