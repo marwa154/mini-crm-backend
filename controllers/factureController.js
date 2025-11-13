@@ -2,6 +2,7 @@
 // Créer une facture
 import Facture from "../models/Facture.js";
 import { createJournal } from "./journalisationController.js"; 
+        import Notification from '../models/notification.js';
 export const createFacture = async (req, res) => {
   try {
    
@@ -45,7 +46,7 @@ console.log(req.body);
       issueDate: invoiceDate,
       dueDate,
       status: status?.toLowerCase() || "non payée",
-      notes: description || ""
+      description: description || ""
     });
      await createJournal({
           userId: req.body.userId,
@@ -56,6 +57,14 @@ console.log(req.body);
           newValue: facture
         });
        
+
+
+await new Notification({
+  userId: clientId,
+  message: `Une nouvelle facture a été créée (${facture.invoiceNumber})`,
+  type: 'SUCCESS',
+}).save();
+
 console.log("Facture créée :", facture);
  
     return res.status(201).json(facture);
