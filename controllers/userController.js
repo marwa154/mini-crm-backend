@@ -1,8 +1,8 @@
 import User from "../models/User.js";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { createJournal } from "./journalisationController.js";
 
-// 🧩 Get all users (admin only)
+
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -12,7 +12,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// 🧱 Create user (admin only)
+
 export const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -29,12 +29,20 @@ export const createUser = async (req, res) => {
       email: user.email,
       role: user.role,
     });
+    await createJournal({
+      userId: req.user._id,
+      typeAction: "CREATE",
+      module: "USER",
+      targetId: user._id,
+      description: `Création de l'utilisateur ${user.name}`,
+      newValue: user,
+    });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// ✏️ Update user (admin only)
 export const updateUser = async (req, res) => {
   try {
     const { name, email, role, password } = req.body;
@@ -52,19 +60,36 @@ export const updateUser = async (req, res) => {
     }
 
     await user.save();
+     await createJournal({
+      userId: req.user._id,
+      typeAction: "UPDATE",
+      module: "USER",
+      targetId: user._id,
+      description: `Mise à jour de l'utilisateur ${user.name}`,
+      newValue: user,
+    });
     res.status(200).json({ message: "User updated successfully", user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// 🗑️ Delete user (admin only)
+
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     await user.deleteOne();
+     await createJournal({
+      userId: req.user._id,
+      typeAction: "DELETE",
+      module: "USER",
+      targetId: user._id,
+      description: `Suppression de l'utilisateur ${user.name}`,
+      oldValue:user,
+    });
+
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

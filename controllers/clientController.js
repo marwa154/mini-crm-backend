@@ -1,11 +1,20 @@
 import Client from "../models/Client.js";
+import { createJournal } from "./journalisationController.js";
 
-// ✅ Create a client (authenticated user)
 export const createClient = async (req, res) => {
   try {
-    const { fullName, company, email, phone, address, city, postalCode } = req.body;
+    const { fullName, company, email, phone, address, city, postalCode } =
+      req.body;
 
-    if (!fullName || !company || !email || !phone || !address || !city || !postalCode) {
+    if (
+      !fullName ||
+      !company ||
+      !email ||
+      !phone ||
+      !address ||
+      !city ||
+      !postalCode
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -19,6 +28,14 @@ export const createClient = async (req, res) => {
       postalCode,
       createdBy: req.user._id,
     });
+    await createJournal({
+      userId: req.user._id,
+      typeAction: "CREATE",
+      module: "CLIENT",
+      targetId: client.fullName,
+      description: `create client ${client._id}`,
+      newValue: client,
+    });
 
     res.status(201).json({
       message: "Client created successfully",
@@ -29,9 +46,6 @@ export const createClient = async (req, res) => {
   }
 };
 
-// ✅ Get all clients
-// - Admins see all clients
-// - Users see only their own
 export const getAllClients = async (req, res) => {
   try {
     let clients;
@@ -48,15 +62,20 @@ export const getAllClients = async (req, res) => {
   }
 };
 
-// ✅ Get a single client by ID
 export const getClientById = async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id).populate("createdBy", "name email");
+    const client = await Client.findById(req.params.id).populate(
+      "createdBy",
+      "name email"
+    );
 
     if (!client) return res.status(404).json({ message: "Client not found" });
 
     // Only admin or creator can access
-    if (req.user.role !== "admin" && client.createdBy._id.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== "admin" &&
+      client.createdBy._id.toString() !== req.user._id.toString()
+    ) {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -72,13 +91,23 @@ export const updateClient = async (req, res) => {
     const client = await Client.findById(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
 
-    // check permissions
-    if (req.user.role !== "admin" && client.createdBy.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== "admin" &&
+      client.createdBy.toString() !== req.user._id.toString()
+    ) {
       return res.status(403).json({ message: "Access denied" });
     }
 
     Object.assign(client, req.body);
     await client.save();
+    await createJournal({
+      userId: req.user._id,
+      typeAction: "UPDATE",
+      module: "CLIENT",
+      targetId: client._id,
+      description: `Mise à jour du client ${client.fullName}`,
+      newValue: client,
+    });
 
     res.status(200).json({ message: "Client updated successfully", client });
   } catch (error) {
@@ -92,11 +121,23 @@ export const deleteClient = async (req, res) => {
     const client = await Client.findById(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
 
-    if (req.user.role !== "admin" && client.createdBy.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== "admin" &&
+      client.createdBy.toString() !== req.user._id.toString()
+    ) {
       return res.status(403).json({ message: "Access denied" });
     }
 
     await client.deleteOne();
+    await createJournal({
+          userId: req.user._id, 
+          typeAction: "DELETE",
+          module: "CLIENT",
+          targetId: client,
+          description: `Suppression du client ${client.fullName}`,
+          oldValue: client,
+        });
+      
     res.status(200).json({ message: "Client deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

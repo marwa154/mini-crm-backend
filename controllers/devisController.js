@@ -5,9 +5,10 @@ export const createDevis = async (req, res) => {
   try {
     console.log(req.body)
     const devis = await Devis.create({
-       codeUnique: `DEV-${Date.now()}`,
+      codeUnique: `DEV-${Date.now()}`,
       clientId: req.body.clientId,
       userId: req.body.userId,
+      status: req.body.status || "brouillon",
       lignes: req.body.lignes,
       totalHT: req.body.totalHT,
       tva: req.body.tva,
@@ -24,7 +25,7 @@ export const createDevis = async (req, res) => {
       newValue: devis
     });
 
-
+  
     res.status(201).json({
       message: "Devis créé avec succès",
       devis
