@@ -1,11 +1,19 @@
 import Devis from "../models/Devis.js";
 import { createJournal } from "./journalisationController.js"; 
+        import Notification from '../models/notification.js';
+
+
 
 export const createDevis = async (req, res) => {
   try {
-    console.log(req.body)
+    // Générer un codeUnique  
+    const randomPart = Math.floor(1000 + Math.random() * 9000);
+    const codeUnique = `DEV-${new Date().getFullYear()}-${randomPart}`;
+
+    // Créer le devis avec le codeUnique déjà défini
     const devis = await Devis.create({
-      codeUnique: `DEV-${Date.now()}`,
+      codeUnique,
+      codeUnique: codeUnique,
       clientId: req.body.clientId,
       userId: req.body.userId,
       status: req.body.status || "brouillon",
@@ -25,11 +33,23 @@ export const createDevis = async (req, res) => {
       newValue: devis
     });
 
+
+
   
-    res.status(201).json({
-      message: "Devis créé avec succès",
-      devis
-    });
+ 
+
+    
+    await new Notification({
+      userId: req.body.userId,
+      message: `Une nouvelle devis a été créée (${codeUnique})`,
+      type: 'SUCCESS',
+    }).save();
+    
+     
+        return res.status(201).json(devis);
+
+
+
   } catch (error) {
     res.status(500).json({ message: " Erreur création devis", error: error.message });
   }
@@ -37,7 +57,7 @@ export const createDevis = async (req, res) => {
 //  Récupérer tous les devis
 export const getAllDevis = async (req, res) => {
   try {
-    const devisList = await Devis.find().populate("clientId userId"); 
+    const devisList = await Devis.find().populate("clientId userId").sort({ createdAt: -1 });; 
     res.status(200).json(devisList);
   } catch (error) {
     res.status(500).json({ message: " Erreur lors de la récupération des devis", error: error.message });
@@ -115,7 +135,7 @@ export const deleteDevis = async (req, res) => {
     const deleted = await Devis.findByIdAndDelete(req.params.id);
 
     
-   console.log("req" +req.body)
+ //  console.log("req" +req.body)
    
      await createJournal({
       userId:deleted.userId, 

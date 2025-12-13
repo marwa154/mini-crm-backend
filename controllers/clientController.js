@@ -85,7 +85,7 @@ export const getClientById = async (req, res) => {
   }
 };
 
-// ✅ Update a client (only admin or creator)
+//  Update a client 
 export const updateClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
@@ -115,7 +115,7 @@ export const updateClient = async (req, res) => {
   }
 };
 
-// ✅ Delete a client (only admin or creator)
+// Delete a client (only admin or creator)
 export const deleteClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);

@@ -1,6 +1,6 @@
 import Notification from '../models/notification.js';
 
-// ➕ Créer une notification
+//  Créer une notification
 export const createNotification = async (req, res) => {
   try {
     const { message, type, userId } = req.body;
@@ -19,7 +19,7 @@ export const createNotification = async (req, res) => {
   }
 };
 
-// 🔔 Récupérer toutes les notifications d’un utilisateur
+//  Récupérer toutes les notifications d’un utilisateur
 export const getUserNotifications = async (req, res) => {
   try {
     const userId = req.query.userId; // <<== vient du frontend
@@ -39,7 +39,7 @@ export const getUserNotifications = async (req, res) => {
 };
 
 
-// ✅ Marquer une notification comme lue
+// Marquer une notification comme lue
 export const markAsRead = async (req, res) => {
   try {
     const notif = await Notification.findByIdAndUpdate(
@@ -58,3 +58,22 @@ export const markAsRead = async (req, res) => {
     res.status(500).json({ message: "Erreur mise à jour notification" });
   }
 };
+
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const notifId = req.params.id;
+console.log("ID de la notification à supprimer :", notifId);
+    const notif = await Notification.findByIdAndDelete(notifId);
+
+    if (!notif) {
+      return res.status(404).json({ message: "Notification non trouvée" });
+    }
+
+    res.json({ message: "Notification supprimée avec succès" });
+  } catch (error) {
+    console.error("Erreur suppression notification :", error);
+    res.status(500).json({ message: "Erreur suppression notification" });
+  }
+};
+
