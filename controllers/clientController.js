@@ -32,8 +32,8 @@ export const createClient = async (req, res) => {
       userId: req.user._id,
       typeAction: "CREATE",
       module: "CLIENT",
-      targetId: client.fullName,
-      description: `create client ${client._id}`,
+      targetId: client._id,
+      description: `create client ${client.fullName}`,
       newValue: client,
     });
 
@@ -50,11 +50,12 @@ export const getAllClients = async (req, res) => {
   try {
     let clients;
 
-    if (req.user.role === "admin") {
-      clients = await Client.find().populate("createdBy", "name email");
-    } else {
-      clients = await Client.find({ createdBy: req.user._id });
-    }
+    // if (req.user.role === "admin") {
+    //   clients = await Client.find().populate("createdBy", "name email");
+    // } else {
+    //   clients = await Client.find({ createdBy: req.user._id });
+    // }
+       clients = await Client.find().populate("createdBy", "name email");
 
     res.status(200).json(clients);
   } catch (error) {
@@ -85,7 +86,7 @@ export const getClientById = async (req, res) => {
   }
 };
 
-//  Update a client 
+//  Update a client
 export const updateClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
@@ -130,14 +131,14 @@ export const deleteClient = async (req, res) => {
 
     await client.deleteOne();
     await createJournal({
-          userId: req.user._id, 
-          typeAction: "DELETE",
-          module: "CLIENT",
-          targetId: client,
-          description: `Suppression du client ${client.fullName}`,
-          oldValue: client,
-        });
-      
+      userId: req.user._id,
+      typeAction: "DELETE",
+      module: "CLIENT",
+      targetId: client,
+      description: `Suppression du client ${client.fullName}`,
+      oldValue: client,
+    });
+
     res.status(200).json({ message: "Client deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

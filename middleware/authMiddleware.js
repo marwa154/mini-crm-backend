@@ -18,7 +18,7 @@ export const protect = async (req, res, next) => {
       if (!user) return res.status(401).json({ message: "User not found" });
 
       req.user = user;
-      req.user_id = user._id; // 👈 ajouté pour simplifier l'accès
+      req.user_id = user._id; 
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, invalid token" });

@@ -54,7 +54,7 @@ export const createDevis = async (req, res) => {
     res.status(500).json({ message: " Erreur création devis", error: error.message });
   }
 };
-//  Récupérer tous les devis
+
 export const getAllDevis = async (req, res) => {
   try {
     const devisList = await Devis.find().populate("clientId userId").sort({ createdAt: -1 });; 
@@ -64,7 +64,7 @@ export const getAllDevis = async (req, res) => {
   }
 };
 
-// Récupérer un devis par ID
+
 export const getDevisById = async (req, res) => {
   try {
     const devis = await Devis.findById(req.params.id).populate("clientId userId");
@@ -79,7 +79,7 @@ export const getDevisById = async (req, res) => {
   }
 };
 
-//  Modifier un devis
+
 export const updateDevis = async (req, res) => {
   try {
     const updatedDevis = await Devis.findByIdAndUpdate(
@@ -98,14 +98,13 @@ export const updateDevis = async (req, res) => {
 
         
       },
-      { new: true, runValidators: true } // retourne le devis mis à jour
+      { new: true, runValidators: true } 
     );
 
     if (!updatedDevis) {
       return res.status(404).json({ message: " Devis non trouvé" });
     }
 
-    // recalcul automatique du totalTTC si HT ou TVA changés
     updatedDevis.totalTTC = updatedDevis.totalHT + (updatedDevis.totalHT * updatedDevis.tva / 100);
     await updatedDevis.save();
       await createJournal({
@@ -134,8 +133,6 @@ export const deleteDevis = async (req, res) => {
 
     const deleted = await Devis.findByIdAndDelete(req.params.id);
 
-    
- //  console.log("req" +req.body)
    
      await createJournal({
       userId:deleted.userId, 

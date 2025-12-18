@@ -1,5 +1,3 @@
-
-// Créer une facture
 import Facture from "../models/Facture.js";
 import { createJournal } from "./journalisationController.js"; 
         import Notification from '../models/notification.js';
