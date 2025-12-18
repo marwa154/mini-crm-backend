@@ -60,12 +60,11 @@ console.log(req.body);
 
 
 await new Notification({
-  userId: clientId,
+  userId: userId,
   message: `Une nouvelle facture a été créée (${facture.invoiceNumber})`,
   type: 'SUCCESS',
 }).save();
 
-console.log("Facture créée :", facture);
  
     return res.status(201).json(facture);
 

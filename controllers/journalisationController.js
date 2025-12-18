@@ -28,7 +28,7 @@ export const createJournal = async ({
 // Récupérer tous les logs
 export const getAllLogs = async (req, res) => {
   try {
-    const logs = await JournalAction.find().sort({ createdAt: -1 }) // tri décroissant par date
+    const logs = await JournalAction.find().sort({ createdAt: -1 }) 
     .populate("userId", "name");
     res.status(200).json(logs);
   } catch (error) {

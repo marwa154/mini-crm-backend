@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createNotification,
+  deleteNotification,
   getUserNotifications,
   markAsRead,
 } from '../controllers/notificationController.js';
@@ -13,6 +14,7 @@ router.post('/', createNotification);
 
 // Récupérer les notifications d’un utilisateur
 router.get('/', getUserNotifications);
+router.delete("/:id", deleteNotification);
 
 
 
